@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Планировщик дня · Тикун Лаб</title>
+<style>
+  :root{
+    --bg:#0E1116; --panel:#161B23; --panel2:#1D232D;
+    --line:#262E3A; --text:#E6ECF1; --muted:#8A95A5;
+    --accent:#5BD3C7; --accent2:#7C9CFF;
+    --a:#E66; --b:#EC9; --c:#9CD; --ok:#6EE7A8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  a{color:var(--accent)}
+  header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  header h1{margin:0;font-size:18px;font-weight:600;letter-spacing:.2px}
+  header .sub{color:var(--muted);font-size:13px}
+  nav{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px}
+  nav button{all:unset;cursor:pointer;padding:8px 14px;border-radius:8px;font-weight:500;font-size:14px;color:var(--muted)}
+  nav button.active{background:var(--accent);color:#0B1116}
+  main{padding:22px;max-width:1100px;margin:0 auto}
+  section{display:none}
+  section.active{display:block}
+  h2{margin:0 0 14px;font-size:22px;font-weight:600}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+  label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  input,select,textarea,button{font:inherit;color:inherit}
+  input[type=text],input[type=date],input[type=time],input[type=number],textarea,select{
+    background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--text)
+  }
+  textarea{width:100%;min-height:70px;resize:vertical}
+  input[type=text]{min-width:0}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
+  th{color:var(--muted);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+  td input[type=text]{width:100%}
+  td input[type=number]{width:80px}
+  .prio{display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:6px;font-weight:600;font-size:12px}
+  .prio-A{background:rgba(238,102,102,.18);color:var(--a)}
+  .prio-B{background:rgba(238,201,153,.18);color:var(--b)}
+  .prio-C{background:rgba(156,205,221,.18);color:var(--c)}
+  button.btn{cursor:pointer;background:var(--accent);color:#0B1116;border:0;padding:9px 16px;border-radius:8px;font-weight:600}
+  button.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+  button.btn.danger{background:transparent;border:1px solid var(--line);color:var(--a)}
+  .pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  .muted{color:var(--muted)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+  .focus-task{font-size:36px;font-weight:600;line-height:1.2;margin:18px 0;color:var(--text)}
+  .focus-task .badge{font-size:14px;vertical-align:middle;margin-right:10px}
+  .timer{font-variant-numeric:tabular-nums;font-size:64px;font-weight:600;letter-spacing:-.02em;margin:8px 0}
+  .timer.warn{color:var(--b)}
+  .timer.over{color:var(--a)}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .controls button{padding:12px 20px;font-size:15px}
+  .progress{height:6px;background:var(--panel2);border-radius:999px;overflow:hidden;margin-top:10px}
+  .progress > span{display:block;height:100%;background:var(--accent);transition:width .3s}
+  .done td{opacity:.55;text-decoration:line-through}
+  .reflect-row{display:grid;grid-template-columns:24px 1.4fr 110px 1fr;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+  .reflect-row input[type=range]{width:100%}
+  .score{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;min-width:34px;text-align:right}
+  footer{padding:18px 22px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);text-align:center}
+  .small{font-size:12px;color:var(--muted)}
+  @media (max-width:640px){
+    nav button{padding:6px 10px;font-size:13px}
+    .focus-task{font-size:26px}
+    .timer{font-size:48px}
+    .reflect-row{grid-template-columns:24px 1fr;row-gap:6px}
+    .reflect-row .score,.reflect-row textarea{grid-column:2}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Планировщик дня</h1>
+    <div class="sub">Карьерный трек · Тикун Лаб · Встреча 8 «Коннекторы и Артефакты»</div>
+  </div>
+  <nav id="tabs">
+    <button data-tab="plan" class="active">1 · Планирование</button>
+    <button data-tab="run">2 · Управление</button>
+    <button data-tab="reflect">3 · Рефлексия</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- PLAN -->
+<section id="plan" class="active">
+  <h2>Что делаем сегодня</h2>
+  <div class="card">
+    <div class="grid">
+      <div>
+        <label>Дата</label><br>
+        <input type="date" id="date">
+      </div>
+      <div>
+        <label>Старт дня</label><br>
+        <input type="time" id="start" value="09:00" step="900">
+      </div>
+      <div>
+        <label>Буфер между задачами, мин</label><br>
+        <input type="number" id="buffer" value="5" min="0" max="60" step="5">
+      </div>
+    </div>
+    <table id="taskTable">
+      <thead>
+        <tr><th style="width:30px">#</th><th>Задача</th><th style="width:90px">Приоритет</th><th style="width:120px">Минут</th><th style="width:60px"></th></tr>
+      </thead>
+      <tbody id="taskBody"></tbody>
+    </table>
+    <div class="row" style="margin-top:14px">
+      <button class="btn ghost" id="addTask">+ Добавить задачу</button>
+      <button class="btn" id="downloadIcs">Скачать .ics для календаря</button>
+      <span class="small" id="planSum"></span>
+    </div>
+  </div>
+  <p class="small">Подсказка: задачи и оценки сохраняются в этом браузере автоматически. Перейди на «Управление», чтобы начать работу.</p>
+</section>
+
+<!-- RUN -->
+<section id="run">
+  <h2>Сейчас</h2>
+  <div class="card" id="runCard">
+    <div id="emptyRun" class="muted" style="display:none">Нет активных задач. Добавь задачи на вкладке «Планирование».</div>
+    <div id="hasRun">
+      <div class="small"><span id="runIndex"></span> · <span class="pill" id="runPrio"></span></div>
+      <div class="focus-task" id="runTitle">—</div>
+      <div class="timer" id="timer">00:00</div>
+      <div class="progress"><span id="bar" style="width:0%"></span></div>
+      <div class="controls">
+        <button class="btn" id="btnStart">▶ Старт</button>
+        <button class="btn ghost" id="btnPause">⏸ Пауза</button>
+        <button class="btn" id="btnDone" style="background:var(--ok)">✓ Готово</button>
+        <button class="btn ghost" id="btnPostpone">↻ Перенести в конец</button>
+        <button class="btn ghost" id="btnNext">→ Дальше</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <label>Очередь</label>
+    <div id="queue" style="margin-top:8px"></div>
+  </div>
+</section>
+
+<!-- REFLECT -->
+<section id="reflect">
+  <h2>Рефлексия дня</h2>
+  <div class="card">
+    <div class="small">Для каждой задачи: была ли сделана, оценка 1–10, главное наблюдение.</div>
+    <div id="reflectList" style="margin-top:10px"></div>
+  </div>
+  <div class="card">
+    <label>Главное наблюдение за день</label>
+    <textarea id="dayNote" placeholder="Что стало понятно? Что изменишь завтра?"></textarea>
+    <div class="row" style="margin-top:10px">
+      <label>Оценка дня</label>
+      <input type="range" id="dayScore" min="1" max="10" value="7" style="flex:1">
+      <span class="score" id="dayScoreVal">7</span>
+    </div>
+  </div>
+  <div class="row" style="margin-top:6px">
+    <button class="btn" id="sendMail">✉ Отправить отчёт на tikun@torbichev.com</button>
+    <button class="btn ghost" id="copyMail">Скопировать текст письма</button>
+    <button class="btn ghost" id="downloadMail">Скачать .txt</button>
+  </div>
+  <p class="small">Кнопка «Отправить» открывает почтового клиента с уже заполненным письмом. Жмёшь «Отправить» в Gmail — и всё.</p>
+</section>
+
+</main>
+
+<footer>
+  Артефакт собран в рамках задания «Коннекторы и Артефакты» — Карьерный трек, Тикун Лаб 2.0
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  const KEY="tikun-planner-v1";
+  const $=s=>document.querySelector(s);
+  const $$=s=>document.querySelectorAll(s);
+  const today=()=>{ const d=new Date(); return d.toISOString().slice(0,10) };
+  const pad=n=>String(n).padStart(2,"0");
+
+  const state=load()||{
+    date:today(), start:"09:00", buffer:5,
+    tasks:[
+      {id:uid(),title:"Утренний обзор почты и календаря",prio:"B",min:20,done:false,score:7,note:""},
+      {id:uid(),title:"Сборка артефакта-планировщика",prio:"A",min:90,done:false,score:8,note:""},
+      {id:uid(),title:"Deep work — главная задача недели",prio:"A",min:120,done:false,score:7,note:""},
+      {id:uid(),title:"Обед и пауза",prio:"C",min:45,done:false,score:7,note:""},
+      {id:uid(),title:"Звонки и согласования",prio:"B",min:60,done:false,score:7,note:""},
+      {id:uid(),title:"Рефлексия дня",prio:"B",min:15,done:false,score:9,note:""},
+    ],
+    runIdx:0, dayNote:"", dayScore:7
+  };
+
+  function uid(){return Math.random().toString(36).slice(2,10)}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+  function load(){try{const v=localStorage.getItem(KEY);return v?JSON.parse(v):null}catch(e){return null}}
+
+  /* tabs */
+  $$("#tabs button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+  function switchTab(name){
+    $$("#tabs button").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
+    ["plan","run","reflect"].forEach(t=>$("#"+t).classList.toggle("active",t===name));
+    if(name==="run")renderRun();
+    if(name==="reflect")renderReflect();
+  }
+
+  /* PLAN */
+  $("#date").value=state.date; $("#start").value=state.start; $("#buffer").value=state.buffer;
+  $("#date").onchange=e=>{state.date=e.target.value;save()};
+  $("#start").onchange=e=>{state.start=e.target.value;save()};
+  $("#buffer").onchange=e=>{state.buffer=+e.target.value||0;save();renderPlan()};
+  $("#addTask").onclick=()=>{state.tasks.push({id:uid(),title:"Новая задача",prio:"B",min:30,done:false,score:7,note:""});save();renderPlan()};
+  $("#downloadIcs").onclick=downloadIcs;
+
+  function renderPlan(){
+    const tb=$("#taskBody"); tb.innerHTML="";
+    state.tasks.forEach((t,i)=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td class="muted">${i+1}</td>
+        <td><input type="text" value="${escapeAttr(t.title)}" data-f="title"></td>
+        <td>
+          <select data-f="prio">
+            <option ${t.prio==="A"?"selected":""}>A</option>
+            <option ${t.prio==="B"?"selected":""}>B</option>
+            <option ${t.prio==="C"?"selected":""}>C</option>
+          </select>
+        </td>
+        <td><input type="number" value="${t.min}" min="5" max="480" step="5" data-f="min"> мин</td>
+        <td><button class="btn danger" data-del>✕</button></td>`;
+      tr.querySelectorAll("[data-f]").forEach(inp=>{
+        inp.oninput=()=>{ const f=inp.dataset.f; t[f]= f==="min" ? (+inp.value||0) : inp.value; save(); updatePlanSum() };
+      });
+      tr.querySelector("[data-del]").onclick=()=>{ state.tasks.splice(i,1); save(); renderPlan() };
+      tb.appendChild(tr);
+    });
+    updatePlanSum();
+  }
+  function updatePlanSum(){
+    const total=state.tasks.reduce((a,b)=>a+(+b.min||0),0);
+    const h=Math.floor(total/60), m=total%60;
+    $("#planSum").textContent= total ? `Всего задач: ${state.tasks.length} · ${h}ч ${m}м работы + ${state.buffer*Math.max(0,state.tasks.length-1)}м буфера` : "";
+  }
+  function escapeAttr(s){return String(s).replace(/"/g,"&quot;")}
+
+  /* ICS */
+  function downloadIcs(){
+    if(!state.tasks.length){alert("Нет задач. Добавь хотя бы одну.");return}
+    const dt=state.date.replace(/-/g,"");
+    const [sh,sm]=state.start.split(":").map(Number);
+    let cursor=new Date(state.date+"T"+state.start+":00");
+    const lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Tikun Lab//Day Planner//RU","CALSCALE:GREGORIAN","METHOD:PUBLISH"];
+    const now=stamp(new Date());
+    state.tasks.forEach((t,i)=>{
+      const s=new Date(cursor);
+      const e=new Date(s.getTime()+(+t.min||0)*60000);
+      lines.push("BEGIN:VEVENT");
+      lines.push("UID:"+t.id+"-"+dt+"@tikun-planner");
+      lines.push("DTSTAMP:"+now);
+      lines.push("DTSTART:"+stamp(s));
+      lines.push("DTEND:"+stamp(e));
+      lines.push("SUMMARY:["+t.prio+"] "+icsEscape(t.title));
+      lines.push("DESCRIPTION:Карьерный трек · Тикун Лаб · Планировщик дня");
+      lines.push("END:VEVENT");
+      cursor=new Date(e.getTime()+state.buffer*60000);
+    });
+    lines.push("END:VCALENDAR");
+    const blob=new Blob([lines.join("\r\n")],{type:"text/calendar;charset=utf-8"});
+    download(blob,"tikun-day-"+state.date+".ics");
+  }
+  function stamp(d){
+    return d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+"T"+pad(d.getUTCHours())+pad(d.getUTCMinutes())+pad(d.getUTCSeconds())+"Z";
+  }
+  function icsEscape(s){return String(s).replace(/\\/g,"\\\\").replace(/,/g,"\\,").replace(/;/g,"\\;").replace(/\n/g,"\\n")}
+  function download(blob,name){
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+  }
+
+  /* RUN */
+  let timerInt=null, remaining=0, running=false;
+
+  function pendingIdx(){
+    for(let i=0;i<state.tasks.length;i++) if(!state.tasks[i].done) return i;
+    return -1;
+  }
+  function renderRun(){
+    const idx=pendingIdx();
+    if(idx<0){
+      $("#emptyRun").style.display="block"; $("#hasRun").style.display="none";
+      $("#queue").innerHTML='<span class="muted">Все задачи закрыты ✓ Перейди на «Рефлексию».</span>';
+      stopTimer();
+      return;
+    }
+    $("#emptyRun").style.display="none"; $("#hasRun").style.display="block";
+    const t=state.tasks[idx]; state.runIdx=idx; save();
+    $("#runIndex").textContent="Задача "+(idx+1)+" из "+state.tasks.length;
+    $("#runPrio").textContent="Приоритет "+t.prio;
+    $("#runPrio").className="pill prio-"+t.prio;
+    $("#runTitle").textContent=t.title;
+    if(!running){ remaining=(+t.min||0)*60; renderTimer() }
+    renderQueue();
+  }
+  function renderQueue(){
+    const q=$("#queue"); q.innerHTML="";
+    state.tasks.forEach((t,i)=>{
+      const row=document.createElement("div"); row.style.display="flex"; row.style.alignItems="center"; row.style.gap="8px"; row.style.padding="4px 0";
+      row.innerHTML=`<span class="prio prio-${t.prio}">${t.prio}</span><span style="flex:1">${i+1}. ${t.title}</span><span class="muted small">${t.min}м</span>`+(t.done?'<span class="pill" style="background:rgba(110,231,168,.15);color:var(--ok);border-color:transparent">готово</span>':"");
+      if(t.done) row.style.opacity=".55";
+      q.appendChild(row);
+    });
+  }
+  function renderTimer(){
+    const m=Math.floor(Math.max(0,remaining)/60), s=Math.max(0,remaining)%60;
+    const el=$("#timer"); el.textContent=pad(m)+":"+pad(s);
+    el.classList.toggle("warn",remaining>0 && remaining<=120);
+    el.classList.toggle("over",remaining<=0);
+    const t=state.tasks[pendingIdx()]; if(!t)return;
+    const total=(+t.min||0)*60;
+    const pct=total>0? Math.min(100, Math.max(0,(total-remaining)/total*100)) : 0;
+    $("#bar").style.width=pct+"%";
+  }
+  function startTimer(){ if(running)return; running=true; timerInt=setInterval(()=>{ remaining--; renderTimer() },1000) }
+  function pauseTimer(){ running=false; clearInterval(timerInt) }
+  function stopTimer(){ pauseTimer(); remaining=0; renderTimer() }
+
+  $("#btnStart").onclick=startTimer;
+  $("#btnPause").onclick=pauseTimer;
+  $("#btnDone").onclick=()=>{ const i=pendingIdx(); if(i<0)return; state.tasks[i].done=true; save(); pauseTimer(); renderRun() };
+  $("#btnPostpone").onclick=()=>{ const i=pendingIdx(); if(i<0)return; const t=state.tasks.splice(i,1)[0]; state.tasks.push(t); save(); pauseTimer(); renderRun() };
+  $("#btnNext").onclick=()=>{ const i=pendingIdx(); if(i<0)return; const t=state.tasks.splice(i,1)[0]; state.tasks.splice(i+1,0,t); save(); pauseTimer(); renderRun() };
+
+  /* REFLECT */
+  function renderReflect(){
+    const root=$("#reflectList"); root.innerHTML="";
+    state.tasks.forEach((t,i)=>{
+      const row=document.createElement("div"); row.className="reflect-row";
+      row.innerHTML=`
+        <input type="checkbox" ${t.done?"checked":""} data-i="${i}" data-k="done">
+        <div>
+          <div>${i+1}. ${escapeText(t.title)} <span class="pill prio-${t.prio}">${t.prio}</span> <span class="small muted">${t.min}м</span></div>
+        </div>
+        <div class="row" style="align-items:center;gap:6px">
+          <input type="range" min="1" max="10" value="${t.score||7}" data-i="${i}" data-k="score" style="flex:1">
+          <span class="score">${t.score||7}</span>
+        </div>
+        <textarea placeholder="Наблюдение по задаче" data-i="${i}" data-k="note">${escapeText(t.note||"")}</textarea>`;
+      root.appendChild(row);
+    });
+    root.querySelectorAll("input,textarea").forEach(el=>{
+      el.oninput=()=>{
+        const i=+el.dataset.i, k=el.dataset.k, t=state.tasks[i];
+        if(k==="done") t.done=el.checked;
+        else if(k==="score"){ t.score=+el.value; el.parentElement.querySelector(".score").textContent=t.score }
+        else t.note=el.value;
+        save();
+      };
+    });
+    $("#dayNote").value=state.dayNote||"";
+    $("#dayScore").value=state.dayScore||7;
+    $("#dayScoreVal").textContent=state.dayScore||7;
+  }
+  function escapeText(s){return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[c])}
+  $("#dayNote").oninput=e=>{state.dayNote=e.target.value;save()};
+  $("#dayScore").oninput=e=>{state.dayScore=+e.target.value;$("#dayScoreVal").textContent=state.dayScore;save()};
+
+  function buildMailBody(){
+    const lines=[];
+    lines.push("Рефлексия дня — "+state.date);
+    lines.push("Оценка дня: "+state.dayScore+"/10");
+    lines.push("");
+    lines.push("Задачи:");
+    state.tasks.forEach((t,i)=>{
+      lines.push((t.done?"[x] ":"[ ] ")+(i+1)+". ["+t.prio+"] "+t.title+" — "+t.min+"м — оценка "+t.score+"/10");
+      if(t.note) lines.push("   Наблюдение: "+t.note);
+    });
+    lines.push("");
+    if(state.dayNote){ lines.push("Главное наблюдение за день:"); lines.push(state.dayNote) }
+    lines.push(""); lines.push("— Отправлено из планировщика «Коннекторы и Артефакты», Тикун Лаб 2.0");
+    return lines.join("\n");
+  }
+  $("#sendMail").onclick=()=>{
+    const subject="Рефлексия "+state.date+" — Карьерный трек";
+    const body=buildMailBody();
+    const url="mailto:tikun@torbichev.com?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+    location.href=url;
+  };
+  $("#copyMail").onclick=async ()=>{
+    try{ await navigator.clipboard.writeText(buildMailBody()); alert("Текст письма скопирован в буфер.") }
+    catch(e){ alert("Не удалось скопировать. Скачай файлом.") }
+  };
+  $("#downloadMail").onclick=()=>{
+    const blob=new Blob([buildMailBody()],{type:"text/plain;charset=utf-8"});
+    download(blob,"reflection-"+state.date+".txt");
+  };
+
+  /* init */
+  renderPlan();
+})();
+</script>
+</body>
+</html>
