@@ -41,7 +41,8 @@
   .save-ping.on{opacity:1;animation:savepulse 1.2s ease}
   @keyframes savepulse{0%{opacity:0;transform:scale(.5)}25%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
   .hero h1{margin:0;font-family:var(--serif);font-size:clamp(40px,7vw,84px);line-height:.95;font-weight:500;letter-spacing:-.02em}
-  .hero h1 .num{color:var(--accent);font-style:italic;font-feature-settings:"lnum","tnum"}
+  .hero h1 .num{color:var(--accent);font-style:italic;font-feature-settings:"lnum","tnum";display:inline-block;animation:heroBreath 4.6s ease-in-out infinite;transform-origin:center}
+  @keyframes heroBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.018)}}
   .hero-sub{color:var(--muted);font-size:14px;margin-top:14px;max-width:60ch}
   .hero-right{text-align:right;color:var(--muted);font-size:12px;letter-spacing:.04em}
   .hero-right .clock{font-family:var(--serif);font-size:28px;color:var(--text);letter-spacing:-.01em;font-feature-settings:"tnum"}
@@ -109,13 +110,19 @@
   .btn svg{width:14px;height:14px}
 
   /* ── RUN MODE (cinematic focus) ───────────────── */
-  .focus-stage{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:48px;display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:center;min-height:380px}
+  .focus-stage{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:48px;display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:center;min-height:380px;transition:box-shadow .5s ease,border-color .5s ease}
+  body.cinema .focus-stage{box-shadow:0 0 0 9999px rgba(0,0,0,.55);border-color:var(--line2);position:relative;z-index:30}
+  body.cinema nav.tabs,body.cinema .queue,body.cinema header.hero,body.cinema footer{opacity:.25;transition:opacity .5s ease;pointer-events:none}
+  body.cinema .focus-stage .kbd-hints{opacity:.4}
   .ring-wrap{position:relative;width:260px;height:260px;flex-shrink:0}
   .ring-wrap svg{transform:rotate(-90deg)}
   .ring-bg{stroke:var(--line2);fill:none;stroke-width:4}
-  .ring-fg{stroke:var(--accent);fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.22,1,.36,1)}
+  .ring-fg{stroke:var(--accent);fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.22,1,.36,1),stroke .35s ease}
   .ring-fg.over{stroke:var(--a)}
   .ring-fg.warn{stroke:#FFB938}
+  .ring-fg.prio-A{stroke:var(--a)}
+  .ring-fg.prio-B{stroke:var(--accent)}
+  .ring-fg.prio-C{stroke:var(--c)}
   .ring-fg.windup{animation:windup .85s cubic-bezier(.22,1,.36,1) forwards;transition:none}
   @keyframes windup{
     0%{stroke-dashoffset:691.15;opacity:.4}
@@ -252,6 +259,7 @@
   /* ── PRINT ────────────────────────────────────── */
   @media print{
     @page{margin:18mm}
+    section#plan,section#run{page-break-after:always}
     html,body{background:#fff!important;color:#111!important;font-size:11pt}
     body{background-image:none!important}
     nav.tabs,.hero-right,footer,.mdock,.kbd-hints,.plan-actions,.focus-controls,.send-row,.task-del,#themeToggle{display:none!important}
@@ -612,14 +620,56 @@
 
   /* ── KEYBOARD ──────────────────────────────────── */
   document.addEventListener("keydown",e=>{
-    if(!$("#run").classList.contains("active"))return;
     const tag=e.target.tagName;
     if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT")return;
+    if($("#plan").classList.contains("active")){
+      if(e.key==="+"||e.key==="="){
+        e.preventDefault();$("#addTask").click();
+        setTimeout(()=>{const last=document.querySelectorAll(".task-title-input");if(last.length){const el=last[last.length-1];el.focus();el.select()}},50);
+        return;
+      }
+      if(e.code==="Escape"){document.activeElement&&document.activeElement.blur&&document.activeElement.blur()}
+      return;
+    }
+    if(!$("#run").classList.contains("active"))return;
     if(e.code==="Space"){e.preventDefault();running?pauseTimer():startTimer()}
     else if(e.code==="Enter"){e.preventDefault();$("#btnDone").click()}
     else if(e.code==="ArrowRight"){e.preventDefault();$("#btnPostpone").click()}
     else if(e.code==="KeyN"){e.preventDefault();$("#btnNext").click()}
+    else if(e.code==="Escape"&&document.body.classList.contains("cinema")){pauseTimer()}
   });
+
+  /* ── EASTER EGG (7 кликов по «Тикун Лаб») ──────── */
+  let eggCount=0,eggTimer=null;
+  const footerEl=document.querySelector("footer");
+  if(footerEl){
+    footerEl.addEventListener("click",e=>{
+      if(!e.target.textContent||!/Тикун/i.test(e.target.textContent||footerEl.textContent))return;
+      eggCount++;clearTimeout(eggTimer);
+      eggTimer=setTimeout(()=>eggCount=0,2200);
+      if(eggCount>=7){
+        eggCount=0;
+        openModal("·   ·   ·",
+`Артефакт-часы · changelog
+
+v1   8.7/10   ring-таймер · карточки · мысль «день №X»
+v2   9.0/10   tick-риски · контекстный hero · keyboard · sound · save-ping
+v3   9.2/10   wind-up · mobile dock · print · sunset theme · drag-and-drop
+v4   9.4/10   weekly heatmap · streak · summary · PNG snapshot · onboarding
+v5   ⋯/10    ring-prio · breathing hero · cinema mode · quick-add · pasha
+
+· · ·
+
+Спасибо Андрею Торбичеву за «Карьерный трек».
+Каждый артефакт здесь — попытка соединить инструмент и характер.
+
+Этот файл — 1 HTML, 0 зависимостей, 0 CDN, работает оффлайн.
+Сделано из «Коннекторов и Артефактов», Тикун Лаб 2.0.
+
+— а.б.`);
+      }
+    });
+  }
 
   /* ── TABS ──────────────────────────────────────── */
   $$("#tabs button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
@@ -744,6 +794,7 @@
     const prioEl=$("#runPrio");prioEl.className="task-prio "+t.prio;prioEl.textContent=t.prio;prioEl.style.width="auto";prioEl.style.padding="2px 8px";prioEl.style.height="auto";
     $("#runTitle").textContent=t.title;
     $("#runDuration").textContent=t.min+" минут";
+    const ringEl=$("#ring");ringEl.classList.remove("prio-A","prio-B","prio-C");ringEl.classList.add("prio-"+t.prio);
     const doneN=state.tasks.filter(x=>x.done).length;
     $("#runDone").textContent=doneN+" готово · "+(state.tasks.length-doneN)+" в очереди";
     if(!running&&!wasStarted){remaining=(+t.min||0)*60;renderTimer(t.min*60)}
@@ -780,6 +831,7 @@
     if(!wasStarted){remaining=total}
     const firstStart=!wasStarted;
     running=true;wasStarted=true;
+    document.body.classList.add("cinema");
     $("#startLabel").textContent="Идёт";
     const ring=$("#ring");
     if(firstStart){
@@ -794,8 +846,8 @@
       renderTimer(total);
     },1000);
   }
-  function pauseTimer(){running=false;clearInterval(timerInt);$("#startLabel").textContent="Продолжить";renderTimer((+state.tasks[pendingIdx()]?.min||0)*60)}
-  function stopTimer(){pauseTimer();wasStarted=false;remaining=0;$("#startLabel").textContent="Старт";renderTimer(1500)}
+  function pauseTimer(){running=false;clearInterval(timerInt);document.body.classList.remove("cinema");$("#startLabel").textContent="Продолжить";renderTimer((+state.tasks[pendingIdx()]?.min||0)*60)}
+  function stopTimer(){pauseTimer();wasStarted=false;remaining=0;document.body.classList.remove("cinema");$("#startLabel").textContent="Старт";renderTimer(1500)}
 
   $("#btnStart").onclick=startTimer;
   $("#btnPause").onclick=pauseTimer;
