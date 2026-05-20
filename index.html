@@ -192,6 +192,49 @@
   .empty{padding:60px 20px;text-align:center;color:var(--muted);font-family:var(--serif);font-size:18px;font-style:italic}
   .plan-empty{grid-column:1/-1;padding:48px 20px;text-align:center;color:var(--muted);font-family:var(--serif);font-size:18px;font-style:italic;border:1px dashed var(--line2);border-radius:14px}
 
+  /* ── HEATMAP ──────────────────────────────────── */
+  .heatmap-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;margin-top:24px}
+  .heatmap-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+  .heatmap-head h3{font-family:var(--serif);font-size:18px;font-weight:500;margin:0;letter-spacing:.01em}
+  .heatmap-head .streak{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.04em}
+  .heatmap{display:flex;gap:6px;align-items:flex-end;height:64px}
+  .heatmap .cell{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:default;transition:transform .15s}
+  .heatmap .cell:hover{transform:translateY(-2px)}
+  .heatmap .bar{width:100%;max-width:48px;background:var(--line2);border-radius:4px;transition:all .25s}
+  .heatmap .cell.empty .bar{background:var(--line);height:8px}
+  .heatmap .cell.has .bar{background:var(--accent);min-height:8px}
+  .heatmap .cell .lbl{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.04em;text-transform:uppercase}
+  .heatmap .cell.today .lbl{color:var(--accent);font-weight:600}
+  .heatmap-empty{color:var(--muted);font-family:var(--serif);font-style:italic;font-size:14px;padding:10px 0}
+
+  /* ── STREAK CHIP ──────────────────────────────── */
+  .streak-chip{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;background:var(--accent-soft);color:var(--accent);border-radius:999px;font-family:var(--sans);font-size:11px;letter-spacing:.04em;text-transform:none;font-weight:600;margin-left:4px}
+  .streak-chip svg{width:11px;height:11px}
+
+  /* ── MODAL ────────────────────────────────────── */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:100;align-items:center;justify-content:center;padding:20px}
+  .modal-bg.on{display:flex;animation:fadeIn .25s ease}
+  .modal{background:var(--panel);border:1px solid var(--line2);border-radius:18px;padding:28px;max-width:560px;width:100%;max-height:80vh;overflow:auto}
+  .modal h3{font-family:var(--serif);font-size:22px;font-weight:500;margin:0 0 16px;letter-spacing:-.01em}
+  .modal-text{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;font-family:var(--mono);font-size:12px;line-height:1.6;white-space:pre-wrap;color:var(--text);max-height:50vh;overflow:auto;margin-bottom:16px}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+
+  /* ── ONBOARDING ───────────────────────────────── */
+  .tour{display:none;position:fixed;bottom:24px;right:24px;background:var(--panel);border:1px solid var(--accent);border-radius:14px;padding:18px 20px;max-width:320px;z-index:80;box-shadow:0 12px 36px rgba(0,0,0,.55),0 0 0 1px var(--accent-soft)}
+  .tour.on{display:block;animation:fadeIn .35s ease}
+  .tour-step{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:8px}
+  .tour-title{font-family:var(--serif);font-size:18px;line-height:1.3;margin:0 0 6px}
+  .tour-body{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:14px}
+  .tour-actions{display:flex;gap:8px;justify-content:space-between;align-items:center}
+  .tour-skip{background:transparent;border:0;color:var(--dim);cursor:pointer;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-family:var(--sans);padding:4px 6px}
+  .tour-skip:hover{color:var(--muted)}
+  .tour-dots{display:flex;gap:4px}
+  .tour-dot{width:5px;height:5px;border-radius:50%;background:var(--line2)}
+  .tour-dot.on{background:var(--accent)}
+  .tour-hi{outline:2px solid var(--accent)!important;outline-offset:4px;border-radius:8px;animation:tourPulse 1.8s ease infinite}
+  @keyframes tourPulse{0%,100%{outline-color:var(--accent)}50%{outline-color:rgba(245,166,35,.4)}}
+  @media (max-width:760px){.tour{left:12px;right:12px;bottom:96px;max-width:none}}
+
   /* ── MOBILE DOCK ──────────────────────────────── */
   .mdock{display:none}
   @media (max-width:760px){
@@ -284,7 +327,7 @@
 
 <header class="hero">
   <div>
-    <div class="hero-mark">Артефакт · Карьерный трек · Тикун Лаб 2.0 <span class="save-ping" id="savePing" title="Сохранено локально"></span></div>
+    <div class="hero-mark">Артефакт · Карьерный трек · Тикун Лаб 2.0 <span class="save-ping" id="savePing" title="Сохранено локально"></span><span class="streak-chip" id="streakChip" style="display:none"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1c1.5 3 4 4 4 7.5C12 11.5 10 14 8 14S4 11.5 4 8.5c0-2 1-3 1-4.5C5 5 6 5 7 6c0-2 1-3 1-5z"/></svg><span id="streakN">0</span></span></div>
     <h1>Сегодня — день <span class="num" id="dayOfYear">140</span></h1>
     <div class="hero-sub" id="heroSub">Три фазы: спланировать, прожить, осмыслить. Один артефакт вместо пяти приложений. Подключи коннекторы Claude — и круг замкнётся.</div>
   </div>
@@ -412,10 +455,24 @@
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4l6 5 6-5M2 4v8h12V4M2 4h12" stroke-linejoin="round"/></svg>
         Отправить на tikun@torbichev.com
       </button>
-      <button class="btn" id="copyMail">Скопировать текст</button>
+      <button class="btn" id="summaryBtn">Резюме</button>
+      <button class="btn" id="snapshotBtn">.png</button>
+      <button class="btn subtle" id="copyMail">Скопировать</button>
       <button class="btn subtle" id="downloadMail">.txt</button>
       <div class="helper">Откроется почтовый клиент с готовым письмом.</div>
     </div>
+  </div>
+
+  <div class="heatmap-card">
+    <div class="heatmap-head">
+      <h3>Неделя</h3>
+      <span class="streak-chip" id="streakChip2" style="display:none">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1c1.5 3 4 4 4 7.5C12 11.5 10 14 8 14S4 11.5 4 8.5c0-2 1-3 1-4.5C5 5 6 5 7 6c0-2 1-3 1-5z"/></svg>
+        <span id="streakN2">0</span> дней подряд
+      </span>
+    </div>
+    <div class="heatmap" id="heatmap"></div>
+    <div class="heatmap-empty" id="heatmapEmpty" style="display:none">История появится по мере дней. Открывай артефакт каждый день — формируется streak.</div>
   </div>
 </section>
 
@@ -424,6 +481,30 @@
 <footer>
   Артефакт-часы <span class="sep">·</span> Карьерный трек <span class="sep">·</span> Тикун Лаб 2.0 <span class="sep">·</span> сделано в Claude
 </footer>
+
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3 id="modalTitle">Резюме дня</h3>
+    <div class="modal-text" id="modalText"></div>
+    <div class="modal-actions">
+      <button class="btn subtle" id="modalClose">Закрыть</button>
+      <button class="btn" id="modalCopy">Скопировать</button>
+    </div>
+  </div>
+</div>
+
+<div class="tour" id="tour">
+  <div class="tour-step" id="tourStep">Шаг 1 из 3</div>
+  <h4 class="tour-title" id="tourTitle">Запиши задачи дня</h4>
+  <p class="tour-body" id="tourBody">Перетаскивай чтобы менять порядок, ставь приоритеты A/B/C, оценивай время. Скачай .ics — задачи попадут в Google Calendar.</p>
+  <div class="tour-actions">
+    <button class="tour-skip" id="tourSkip">Пропустить</button>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="tour-dots"><span class="tour-dot on"></span><span class="tour-dot"></span><span class="tour-dot"></span></div>
+      <button class="btn primary" id="tourNext" style="padding:6px 14px;font-size:12px">Дальше →</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -449,6 +530,21 @@
     runIdx:0,dayNote:"",dayScore:7
   };
   let state=load()||defaultState;
+  if(!state.history)state.history=[];
+  /* archive previous day if user opens artefact on a new date */
+  (function archivePrevDay(){
+    const td=today();
+    if(state.date && state.date !== td){
+      const tasks=state.tasks||[];
+      const done=tasks.filter(t=>t.done).length;
+      const snap={date:state.date,tasksCount:tasks.length,doneCount:done,score:state.dayScore||0,note:state.dayNote||""};
+      const existing=state.history.findIndex(h=>h.date===snap.date);
+      if(existing>=0)state.history[existing]=snap;else state.history.push(snap);
+      state.history=state.history.slice(-30);
+      state.tasks=tasks.map(t=>({...t,done:false,note:"",score:7}));
+      state.date=td;state.dayNote="";state.dayScore=7;
+    }
+  })();
   let savePingTimer=null;
   function save(){
     try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
@@ -532,7 +628,7 @@
     ["plan","run","reflect"].forEach(t=>$("#"+t).classList.toggle("active",t===name));
     document.body.classList.toggle("run-active",name==="run");
     if(name==="run")renderRun();
-    if(name==="reflect")renderReflect();
+    if(name==="reflect"){renderReflect();renderHeatmap()}
   }
 
   /* ── PLAN ──────────────────────────────────────── */
@@ -769,6 +865,183 @@
   $("#copyMail").onclick=async()=>{try{await navigator.clipboard.writeText(buildMailBody());alert("Скопировано в буфер.")}catch(e){alert("Не удалось скопировать — скачай файлом.")}};
   $("#downloadMail").onclick=()=>download(new Blob([buildMailBody()],{type:"text/plain;charset=utf-8"}),"reflection-"+state.date+".txt");
 
+  /* ── HEATMAP + STREAK ──────────────────────────── */
+  function lastNDays(n){
+    const out=[];const base=new Date();
+    for(let i=n-1;i>=0;i--){
+      const d=new Date(base);d.setDate(base.getDate()-i);
+      out.push({date:d.toISOString().slice(0,10),wday:wdays[d.getDay()].slice(0,2)});
+    }
+    return out;
+  }
+  function findSnap(date){
+    if(date===state.date){
+      const t=state.tasks||[];
+      return {date,tasksCount:t.length,doneCount:t.filter(x=>x.done).length,score:state.dayScore||0,note:state.dayNote||""};
+    }
+    return state.history.find(h=>h.date===date);
+  }
+  function computeStreak(){
+    let streak=0;const days=lastNDays(60);
+    for(let i=days.length-1;i>=0;i--){
+      const s=findSnap(days[i].date);
+      if(!s||!s.tasksCount){if(days[i].date===state.date)continue;break}
+      const ratio=s.doneCount/Math.max(1,s.tasksCount);
+      if(ratio>=0.5)streak++;else break;
+    }
+    return streak;
+  }
+  function renderHeatmap(){
+    const root=$("#heatmap");if(!root)return;
+    const days=lastNDays(7);
+    let hasData=false;
+    root.innerHTML=days.map(d=>{
+      const s=findSnap(d.date);
+      const isToday=d.date===state.date;
+      let height=8;let cls="empty";let title=d.date+" — нет данных";
+      if(s && s.tasksCount){
+        hasData=true;cls="has";
+        const ratio=s.doneCount/Math.max(1,s.tasksCount);
+        height=Math.round(12+ratio*44);
+        const opacity=0.35+0.65*((s.score||7)/10);
+        title=`${d.date} · ${s.doneCount}/${s.tasksCount} · оценка ${s.score||"–"}/10`;
+        return `<div class="cell has${isToday?' today':''}" title="${title}"><div class="bar" style="height:${height}px;opacity:${opacity}"></div><div class="lbl">${d.wday}</div></div>`;
+      }
+      return `<div class="cell empty${isToday?' today':''}" title="${title}"><div class="bar" style="height:${height}px"></div><div class="lbl">${d.wday}</div></div>`;
+    }).join("");
+    $("#heatmapEmpty").style.display=hasData?"none":"block";
+    updateStreak();
+  }
+  function updateStreak(){
+    const n=computeStreak();
+    const chip=$("#streakChip"),chip2=$("#streakChip2");
+    if(n>=2){
+      chip.style.display="inline-flex";$("#streakN").textContent=n;
+      chip2.style.display="inline-flex";$("#streakN2").textContent=n;
+    }else{
+      chip.style.display="none";chip2.style.display="none";
+    }
+  }
+
+  /* ── SUMMARY MODAL ─────────────────────────────── */
+  function buildSummary(){
+    const t=state.tasks||[];
+    const done=t.filter(x=>x.done);
+    const top=[...t].filter(x=>x.done).sort((a,b)=>(b.score||0)-(a.score||0))[0];
+    const weak=[...t].filter(x=>x.note&&(x.score||10)<7)[0];
+    const lines=[
+      `📅 День ${$("#dayOfYear").textContent} · ${state.date}`,
+      `⚡ Закрыто ${done.length}/${t.length} · оценка ${state.dayScore||0}/10`,
+      ""
+    ];
+    if(state.dayNote){lines.push("◇ Главное наблюдение:",state.dayNote,"")}
+    if(top){lines.push(`✓ Топ-вклад: ${top.title} (${top.score}/10)`);if(top.note)lines.push(`  → ${top.note}`);lines.push("")}
+    if(weak){lines.push(`✕ Узкое место: ${weak.title} (${weak.score}/10)`);if(weak.note)lines.push(`  → ${weak.note}`);lines.push("")}
+    const streak=computeStreak();
+    if(streak>=2)lines.push(`🔥 ${streak} дней подряд в потоке`);
+    lines.push("","— артефакт-часы · карьерный трек · тикун лаб 2.0");
+    return lines.join("\n");
+  }
+  function openModal(title,text){$("#modalTitle").textContent=title;$("#modalText").textContent=text;$("#modal").classList.add("on")}
+  $("#summaryBtn").onclick=()=>openModal("Резюме дня",buildSummary());
+  $("#modalClose").onclick=()=>$("#modal").classList.remove("on");
+  $("#modal").addEventListener("click",e=>{if(e.target.id==="modal")$("#modal").classList.remove("on")});
+  $("#modalCopy").onclick=async()=>{try{await navigator.clipboard.writeText($("#modalText").textContent);$("#modalCopy").textContent="Скопировано ✓";setTimeout(()=>$("#modalCopy").textContent="Скопировать",1500)}catch(e){}};
+
+  /* ── PNG SNAPSHOT ──────────────────────────────── */
+  function downloadSnapshot(){
+    const W=1200,H=630;
+    const c=document.createElement("canvas");c.width=W;c.height=H;
+    const x=c.getContext("2d");
+    const sunset=document.body.classList.contains("theme-sunset");
+    const bg=sunset?"#1B1410":"#0A0E14";
+    const accent=sunset?"#FF9A6B":"#F5A623";
+    const text="#ECEEF1";const muted="#7A8493";const dim="#4B5566";
+    /* background */
+    x.fillStyle=bg;x.fillRect(0,0,W,H);
+    /* corner glow */
+    const g=x.createRadialGradient(140,-60,40,140,-60,520);
+    g.addColorStop(0,sunset?"rgba(255,154,107,.18)":"rgba(245,166,35,.16)");g.addColorStop(1,"transparent");
+    x.fillStyle=g;x.fillRect(0,0,W,H);
+    /* eyebrow */
+    x.fillStyle=dim;x.font="500 14px ui-sans-serif,system-ui,Segoe UI";x.textBaseline="top";
+    x.fillText("АРТЕФАКТ · КАРЬЕРНЫЙ ТРЕК · ТИКУН ЛАБ 2.0".split("").join(" "),64,64);
+    /* hero */
+    const doy=$("#dayOfYear").textContent;
+    x.fillStyle=text;x.font="500 96px 'Iowan Old Style','Charter','Georgia',serif";
+    x.fillText("Сегодня — день ",64,120);
+    const w1=x.measureText("Сегодня — день ").width;
+    x.fillStyle=accent;x.font="italic 500 96px 'Iowan Old Style','Charter','Georgia',serif";
+    x.fillText(doy,64+w1,120);
+    /* date line */
+    x.fillStyle=muted;x.font="400 22px 'Iowan Old Style','Charter','Georgia',serif";
+    x.fillText(state.date+" · "+($("#todayLabel").textContent||""),64,240);
+    /* stats */
+    const t=state.tasks||[];const done=t.filter(z=>z.done).length;
+    x.fillStyle=text;x.font="500 64px 'Iowan Old Style','Charter','Georgia',serif";
+    x.fillText(done+" / "+t.length,64,310);
+    x.fillStyle=muted;x.font="400 18px ui-sans-serif,system-ui";x.fillText("задач закрыто",64,388);
+    x.fillStyle=accent;x.font="500 64px 'Iowan Old Style','Charter','Georgia',serif";
+    x.fillText((state.dayScore||0)+"/10",340,310);
+    x.fillStyle=muted;x.font="400 18px ui-sans-serif,system-ui";x.fillText("оценка дня",340,388);
+    /* day note */
+    const note=(state.dayNote||"").trim();
+    if(note){
+      x.fillStyle=text;x.font="italic 400 26px 'Iowan Old Style','Charter','Georgia',serif";
+      wrapText(x,"« "+note+" »",64,460,W-128,36);
+    }
+    /* footer */
+    x.fillStyle=dim;x.font="500 12px ui-monospace,monospace";
+    x.fillText("mmstariki62-hub.github.io/tikun-day-planner",64,H-50);
+    /* download */
+    c.toBlob(blob=>{
+      const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="tikun-day-"+state.date+".png";a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+    },"image/png");
+  }
+  function wrapText(ctx,text,x,y,maxW,lh){
+    const words=text.split(" ");let line="";let yy=y;let lines=0;
+    for(let i=0;i<words.length&&lines<4;i++){
+      const test=line+words[i]+" ";
+      if(ctx.measureText(test).width>maxW&&line){ctx.fillText(line.trim(),x,yy);line=words[i]+" ";yy+=lh;lines++}
+      else line=test;
+    }
+    if(lines<4)ctx.fillText(line.trim(),x,yy);
+  }
+  $("#snapshotBtn").onclick=downloadSnapshot;
+
+  /* ── ONBOARDING TOUR ───────────────────────────── */
+  const TOUR_KEY="tikun-onboarded";
+  const tourSteps=[
+    {tab:"plan",hi:"#addTask",title:"Запиши задачи дня",body:"Перетаскивай чтобы менять порядок, ставь приоритеты A/B/C, оценивай время. Скачай .ics — задачи попадут в Google Calendar."},
+    {tab:"run",hi:"#btnStart",title:"Один таймер за раз",body:"Нажми Старт — кольцо начнёт отсчёт. Space — пауза, Enter — задача готова, → — в конец очереди. Звук на финише."},
+    {tab:"reflect",hi:"#sendMail",title:"Закрой день рефлексией",body:"Отметь сделанное, поставь оценки, добавь наблюдение. Нажми «Отправить» — откроется почта с готовым письмом на tikun@torbichev.com."}
+  ];
+  let tourIdx=0;
+  function showTour(){
+    document.querySelectorAll(".tour-hi").forEach(e=>e.classList.remove("tour-hi"));
+    const s=tourSteps[tourIdx];if(!s){closeTour();return}
+    switchTab(s.tab);
+    setTimeout(()=>{const el=document.querySelector(s.hi);if(el)el.classList.add("tour-hi")},100);
+    $("#tourStep").textContent="Шаг "+(tourIdx+1)+" из "+tourSteps.length;
+    $("#tourTitle").textContent=s.title;
+    $("#tourBody").textContent=s.body;
+    document.querySelectorAll(".tour-dot").forEach((d,i)=>d.classList.toggle("on",i<=tourIdx));
+    $("#tourNext").textContent=tourIdx===tourSteps.length-1?"Готово ✓":"Дальше →";
+    $("#tour").classList.add("on");
+  }
+  function closeTour(){
+    $("#tour").classList.remove("on");
+    document.querySelectorAll(".tour-hi").forEach(e=>e.classList.remove("tour-hi"));
+    try{localStorage.setItem(TOUR_KEY,"1")}catch(e){}
+  }
+  $("#tourNext").onclick=()=>{tourIdx++;if(tourIdx>=tourSteps.length)closeTour();else showTour()};
+  $("#tourSkip").onclick=closeTour;
+  (function maybeStartTour(){
+    try{if(localStorage.getItem(TOUR_KEY))return}catch(e){return}
+    setTimeout(showTour,800);
+  })();
+
   /* ── THEME ─────────────────────────────────────── */
   const THEME_KEY="tikun-theme";
   function applyTheme(name){
@@ -791,6 +1064,7 @@
 
   /* ── INIT ──────────────────────────────────────── */
   renderPlan();
+  updateStreak();
 })();
 </script>
 </body>
