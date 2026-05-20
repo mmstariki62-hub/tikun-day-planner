@@ -69,10 +69,15 @@
   .meta-row input[type=number]{width:80px;min-width:80px}
 
   .tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-bottom:24px}
-  .task-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;transition:border-color .2s,transform .2s}
+  .task-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;transition:border-color .2s,transform .2s,opacity .2s;cursor:grab}
+  .task-card:active{cursor:grabbing}
   .task-card:hover{border-color:var(--line2)}
   .task-card.done{opacity:.45}
   .task-card.done .task-title{text-decoration:line-through}
+  .task-card.dragging{opacity:.4;transform:scale(.98)}
+  .task-card.drop-before{box-shadow:-3px 0 0 0 var(--accent),0 0 0 1px var(--accent)}
+  .task-card.drop-after{box-shadow:3px 0 0 0 var(--accent),0 0 0 1px var(--accent)}
+  .drag-handle{display:inline-block;color:var(--dim);font-size:14px;margin-right:4px;cursor:grab;user-select:none}
   .task-card-head{display:flex;align-items:center;gap:10px}
   .task-num{font-family:var(--serif);font-size:24px;color:var(--dim);font-feature-settings:"lnum";line-height:1;min-width:30px}
   .task-prio{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:.04em;font-family:var(--sans)}
@@ -111,6 +116,12 @@
   .ring-fg{stroke:var(--accent);fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.22,1,.36,1)}
   .ring-fg.over{stroke:var(--a)}
   .ring-fg.warn{stroke:#FFB938}
+  .ring-fg.windup{animation:windup .85s cubic-bezier(.22,1,.36,1) forwards;transition:none}
+  @keyframes windup{
+    0%{stroke-dashoffset:691.15;opacity:.4}
+    40%{stroke-dashoffset:0;opacity:1}
+    100%{stroke-dashoffset:691.15;opacity:1}
+  }
   .tick{stroke:var(--line2);stroke-linecap:butt}
   .tick.major{stroke:var(--dim);stroke-width:1.5}
   .tick.minor{stroke:var(--line2);stroke-width:1}
@@ -181,7 +192,79 @@
   .empty{padding:60px 20px;text-align:center;color:var(--muted);font-family:var(--serif);font-size:18px;font-style:italic}
   .plan-empty{grid-column:1/-1;padding:48px 20px;text-align:center;color:var(--muted);font-family:var(--serif);font-size:18px;font-style:italic;border:1px dashed var(--line2);border-radius:14px}
 
-  /* ── MOBILE ───────────────────────────────────── */
+  /* ── MOBILE DOCK ──────────────────────────────── */
+  .mdock{display:none}
+  @media (max-width:760px){
+    body.run-active{padding-bottom:88px}
+    .mdock{display:flex;position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));background:rgba(16,20,28,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line2);border-radius:18px;padding:10px 14px;gap:8px;align-items:center;justify-content:space-around;z-index:50;box-shadow:0 8px 28px rgba(0,0,0,.55)}
+    .mdock button{all:unset;cursor:pointer;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--panel2);border:1px solid var(--line2);color:var(--text);transition:all .15s}
+    .mdock button.primary{background:var(--accent);color:#0A0E14;border-color:var(--accent);width:64px;height:64px}
+    .mdock button.success{background:var(--ok);color:#0A0E14;border-color:var(--ok)}
+    .mdock button:active{transform:scale(.92)}
+    .mdock button svg{width:22px;height:22px}
+    .mdock button.primary svg{width:26px;height:26px}
+    .kbd-hints{display:none}
+  }
+
+  /* ── PRINT ────────────────────────────────────── */
+  @media print{
+    @page{margin:18mm}
+    html,body{background:#fff!important;color:#111!important;font-size:11pt}
+    body{background-image:none!important}
+    nav.tabs,.hero-right,footer,.mdock,.kbd-hints,.plan-actions,.focus-controls,.send-row,.task-del,#themeToggle{display:none!important}
+    .hero{border-color:#000;padding:0 0 16px;grid-template-columns:1fr}
+    .hero h1{color:#000;font-size:36pt}
+    .hero h1 .num{color:#a55b00;font-style:italic}
+    .hero-mark{color:#555}
+    .hero-sub{color:#333}
+    main{padding:0;max-width:none}
+    section.tab{display:block!important;page-break-inside:avoid;margin-top:24px}
+    section.tab::before{content:attr(data-print);display:block;font-family:var(--serif);font-size:18pt;color:#000;border-bottom:1px solid #000;padding-bottom:6px;margin-bottom:12px;letter-spacing:.02em}
+    .meta-row,.tasks,.queue,.focus-stage,.reflect-card,.day-summary,.task-card{background:#fff!important;border-color:#bbb!important;color:#000!important;box-shadow:none!important}
+    .task-card,.queue-row,.reflect-card{break-inside:avoid;page-break-inside:avoid}
+    .tasks{grid-template-columns:1fr 1fr;gap:8px}
+    .task-title-input,.rnote,textarea,input{color:#000!important;background:transparent!important;border-color:#aaa!important}
+    .task-prio.A{background:#fde6e6!important;color:#a02828!important}
+    .task-prio.B{background:#f5efe0!important;color:#8a7838!important}
+    .task-prio.C{background:#e3ecf2!important;color:#3e5d72!important}
+    .focus-stage{grid-template-columns:auto 1fr;page-break-after:always}
+    .focus-task{color:#000}
+    .ring-bg,.tick.minor{stroke:#ccc!important}
+    .ring-fg{stroke:#a55b00!important}
+    .tick.major{stroke:#666!important}
+    .ring-text .timer,.day-summary h3,.rtitle{color:#000!important}
+    .queue-row.now{background:#fff7e6!important}
+  }
+  /* ── THEME · SUNSET ───────────────────────────── */
+  body.theme-sunset{
+    --bg:#1B1410;
+    --panel:#221814;
+    --panel2:#2B1F1A;
+    --line:#322620;
+    --line2:#3F302A;
+    --text:#F0E8E0;
+    --muted:#A89888;
+    --dim:#605145;
+    --accent:#FF9A6B;
+    --accent-soft:rgba(255,154,107,.14);
+    --a:#E25555;
+    --b:#D8B97C;
+    --c:#98897A;
+    --ok:#7BC495;
+    background:
+      radial-gradient(circle at 12% -10%, rgba(255,154,107,.07), transparent 35%),
+      radial-gradient(circle at 88% 110%, rgba(216,185,124,.05), transparent 40%),
+      #1B1410 !important;
+  }
+  body.theme-sunset .task-prio.A{background:rgba(226,85,85,.16);color:var(--a)}
+  body.theme-sunset .task-prio.B{background:rgba(216,185,124,.16);color:var(--b)}
+  body.theme-sunset .task-prio.C{background:rgba(152,137,122,.16);color:var(--c)}
+
+  #themeToggle{background:transparent;border:1px solid var(--line2);color:var(--muted);width:34px;height:34px;border-radius:50%;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-top:10px;transition:all .2s}
+  #themeToggle:hover{color:var(--accent);border-color:var(--accent)}
+  #themeToggle svg{width:16px;height:16px}
+
+  /* ── MOBILE LAYOUT ────────────────────────────── */
   @media (max-width:760px){
     .hero{padding:32px 20px 24px;grid-template-columns:1fr}
     .hero-right{text-align:left}
@@ -208,6 +291,9 @@
   <div class="hero-right">
     <div class="clock" id="clock">00:00</div>
     <div id="todayLabel">—</div>
+    <button id="themeToggle" title="Переключить тему">
+      <svg id="iconMoon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M13 9.5A5 5 0 0 1 6.5 3a5 5 0 1 0 6.5 6.5z" stroke-linejoin="round"/></svg>
+    </button>
   </div>
 </header>
 
@@ -220,7 +306,7 @@
 <main>
 
 <!-- ─────────────── PLAN ─────────────── -->
-<section id="plan" class="tab active">
+<section id="plan" class="tab active" data-print="Планирование">
   <div class="meta-row">
     <div class="field"><label>Дата</label><input type="date" id="date"></div>
     <div class="field"><label>Старт дня</label><input type="time" id="start" value="09:00" step="900"></div>
@@ -241,7 +327,7 @@
 </section>
 
 <!-- ─────────────── RUN ─────────────── -->
-<section id="run" class="tab">
+<section id="run" class="tab" data-print="Управление">
   <div id="runEmpty" class="empty" style="display:none">Очередь пуста. Все задачи закрыты — переходи на рефлексию.</div>
   <div id="runStage" class="focus-stage">
     <div class="ring-wrap">
@@ -297,6 +383,12 @@
       </div>
     </div>
   </div>
+  <div class="mdock" id="mdock">
+    <button id="mPause" title="Пауза"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="4" y="3" width="3" height="10"/><rect x="9" y="3" width="3" height="10"/></svg></button>
+    <button class="primary" id="mStart" title="Старт"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 3l9 5-9 5z"/></svg></button>
+    <button class="success" id="mDone" title="Готово"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 8l3 3 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button id="mNext" title="Дальше"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h10M10 5l3 3-3 3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
   <div class="queue">
     <div class="queue-title">Очередь дня</div>
     <div class="queue-list" id="queue"></div>
@@ -304,7 +396,7 @@
 </section>
 
 <!-- ─────────────── REFLECT ─────────────── -->
-<section id="reflect" class="tab">
+<section id="reflect" class="tab" data-print="Рефлексия">
   <div id="reflectList"></div>
   <div class="day-summary">
     <div class="day-summary-head">
@@ -438,6 +530,7 @@
   function switchTab(name){
     $$("#tabs button").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
     ["plan","run","reflect"].forEach(t=>$("#"+t).classList.toggle("active",t===name));
+    document.body.classList.toggle("run-active",name==="run");
     if(name==="run")renderRun();
     if(name==="reflect")renderReflect();
   }
@@ -459,8 +552,11 @@
     state.tasks.forEach((t,i)=>{
       const card=document.createElement("div");
       card.className="task-card"+(t.done?" done":"");
+      card.setAttribute("draggable","true");
+      card.dataset.idx=i;
       card.innerHTML=`
         <div class="task-card-head">
+          <span class="drag-handle" title="Перетащи чтобы поменять порядок">⋮⋮</span>
           <span class="task-num">${pad(i+1)}</span>
           <span class="task-prio ${t.prio}">${t.prio}</span>
           <span class="task-time">${t.min} мин</span>
@@ -481,6 +577,28 @@
           updateSummary()};
       });
       card.querySelector("[data-del]").onclick=()=>{state.tasks.splice(i,1);save();renderPlan()};
+      card.addEventListener("dragstart",e=>{e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",i);card.classList.add("dragging")});
+      card.addEventListener("dragend",()=>{card.classList.remove("dragging");document.querySelectorAll(".task-card").forEach(c=>c.classList.remove("drop-before","drop-after"))});
+      card.addEventListener("dragover",e=>{
+        e.preventDefault();e.dataTransfer.dropEffect="move";
+        const rect=card.getBoundingClientRect();
+        const before=(e.clientX-rect.left)<rect.width/2;
+        card.classList.toggle("drop-before",before);
+        card.classList.toggle("drop-after",!before);
+      });
+      card.addEventListener("dragleave",()=>card.classList.remove("drop-before","drop-after"));
+      card.addEventListener("drop",e=>{
+        e.preventDefault();
+        const from=+e.dataTransfer.getData("text/plain");
+        if(isNaN(from)||from===i)return;
+        const rect=card.getBoundingClientRect();
+        const before=(e.clientX-rect.left)<rect.width/2;
+        let to=before?i:i+1;
+        const moved=state.tasks.splice(from,1)[0];
+        if(from<to)to--;
+        state.tasks.splice(to,0,moved);
+        save();renderPlan();
+      });
       root.appendChild(card);
     });
     updateSummary();
@@ -564,8 +682,14 @@
     const idx=pendingIdx();if(idx<0)return;
     const total=(+state.tasks[idx].min||0)*60;
     if(!wasStarted){remaining=total}
+    const firstStart=!wasStarted;
     running=true;wasStarted=true;
     $("#startLabel").textContent="Идёт";
+    const ring=$("#ring");
+    if(firstStart){
+      ring.classList.remove("windup");void ring.offsetWidth;ring.classList.add("windup");
+      setTimeout(()=>ring.classList.remove("windup"),850);
+    }
     renderTimer(total);
     let beeped=false;
     timerInt=setInterval(()=>{
@@ -582,6 +706,10 @@
   $("#btnDone").onclick=()=>{const i=pendingIdx();if(i<0)return;state.tasks[i].done=true;save();stopTimer();renderRun()};
   $("#btnPostpone").onclick=()=>{const i=pendingIdx();if(i<0)return;const t=state.tasks.splice(i,1)[0];state.tasks.push(t);save();stopTimer();renderRun()};
   $("#btnNext").onclick=()=>{const i=pendingIdx();if(i<0)return;const t=state.tasks.splice(i,1)[0];state.tasks.splice(i+1,0,t);save();stopTimer();renderRun()};
+  $("#mStart").onclick=()=>$("#btnStart").click();
+  $("#mPause").onclick=()=>$("#btnPause").click();
+  $("#mDone").onclick=()=>$("#btnDone").click();
+  $("#mNext").onclick=()=>$("#btnNext").click();
 
   /* ── REFLECT ───────────────────────────────────── */
   function renderReflect(){
@@ -640,6 +768,26 @@
   };
   $("#copyMail").onclick=async()=>{try{await navigator.clipboard.writeText(buildMailBody());alert("Скопировано в буфер.")}catch(e){alert("Не удалось скопировать — скачай файлом.")}};
   $("#downloadMail").onclick=()=>download(new Blob([buildMailBody()],{type:"text/plain;charset=utf-8"}),"reflection-"+state.date+".txt");
+
+  /* ── THEME ─────────────────────────────────────── */
+  const THEME_KEY="tikun-theme";
+  function applyTheme(name){
+    document.body.classList.toggle("theme-sunset",name==="sunset");
+    const ic=document.getElementById("iconMoon");
+    if(ic){
+      ic.innerHTML = name==="sunset"
+        ? '<circle cx="8" cy="8" r="3" fill="currentColor"/><g stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5L13 13M3 13l1.5-1.5M11.5 4.5L13 3"/></g>'
+        : '<path d="M13 9.5A5 5 0 0 1 6.5 3a5 5 0 1 0 6.5 6.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" fill="none"/>';
+    }
+  }
+  const savedTheme=(()=>{try{return localStorage.getItem(THEME_KEY)||"midnight"}catch(e){return "midnight"}})();
+  applyTheme(savedTheme);
+  document.getElementById("themeToggle").onclick=()=>{
+    const cur=document.body.classList.contains("theme-sunset")?"sunset":"midnight";
+    const next=cur==="sunset"?"midnight":"sunset";
+    try{localStorage.setItem(THEME_KEY,next)}catch(e){}
+    applyTheme(next);
+  };
 
   /* ── INIT ──────────────────────────────────────── */
   renderPlan();
