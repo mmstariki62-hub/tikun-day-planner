@@ -17,8 +17,8 @@
     --accent:#F5A623;
     --accent-soft:rgba(245,166,35,.12);
     --a:#E25555;
-    --b:#F5A623;
-    --c:#5BA5C7;
+    --b:#C8B98F;
+    --c:#7A93A8;
     --ok:#5FB987;
     --serif:'Iowan Old Style','Charter','Source Serif Pro','Georgia',ui-serif,serif;
     --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
@@ -36,7 +36,10 @@
 
   /* ── HERO ─────────────────────────────────────── */
   .hero{padding:48px 32px 28px;max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;border-bottom:1px solid var(--line)}
-  .hero-mark{font-family:var(--serif);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+  .hero-mark{font-family:var(--serif);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;display:flex;align-items:center;gap:10px}
+  .save-ping{width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0;transition:opacity .25s ease}
+  .save-ping.on{opacity:1;animation:savepulse 1.2s ease}
+  @keyframes savepulse{0%{opacity:0;transform:scale(.5)}25%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
   .hero h1{margin:0;font-family:var(--serif);font-size:clamp(40px,7vw,84px);line-height:.95;font-weight:500;letter-spacing:-.02em}
   .hero h1 .num{color:var(--accent);font-style:italic;font-feature-settings:"lnum","tnum"}
   .hero-sub{color:var(--muted);font-size:14px;margin-top:14px;max-width:60ch}
@@ -73,9 +76,9 @@
   .task-card-head{display:flex;align-items:center;gap:10px}
   .task-num{font-family:var(--serif);font-size:24px;color:var(--dim);font-feature-settings:"lnum";line-height:1;min-width:30px}
   .task-prio{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:.04em;font-family:var(--sans)}
-  .task-prio.A{background:rgba(226,85,85,.14);color:var(--a)}
-  .task-prio.B{background:rgba(245,166,35,.14);color:var(--b)}
-  .task-prio.C{background:rgba(91,165,199,.14);color:var(--c)}
+  .task-prio.A{background:rgba(226,85,85,.13);color:var(--a)}
+  .task-prio.B{background:rgba(200,185,143,.13);color:var(--b)}
+  .task-prio.C{background:rgba(122,147,168,.13);color:var(--c)}
   .task-time{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);font-feature-settings:"tnum"}
   .task-title-input{background:transparent;border:0;font-family:var(--serif);font-size:18px;color:var(--text);width:100%;outline:none;padding:2px 0;line-height:1.3}
   .task-title-input:focus{outline:1px solid var(--line2);outline-offset:4px;border-radius:2px}
@@ -108,6 +111,9 @@
   .ring-fg{stroke:var(--accent);fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.22,1,.36,1)}
   .ring-fg.over{stroke:var(--a)}
   .ring-fg.warn{stroke:#FFB938}
+  .tick{stroke:var(--line2);stroke-linecap:butt}
+  .tick.major{stroke:var(--dim);stroke-width:1.5}
+  .tick.minor{stroke:var(--line2);stroke-width:1}
   .ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
   .ring-text .timer{font-family:var(--serif);font-size:62px;line-height:1;letter-spacing:-.02em;font-feature-settings:"tnum"}
   .ring-text .timer.over{color:var(--a)}
@@ -121,6 +127,8 @@
   .focus-meta{display:flex;gap:18px;color:var(--muted);font-size:13px;align-items:center}
   .focus-meta .dot,.focus-eyebrow .dot{display:inline-block;width:4px;height:4px;background:var(--dim);border-radius:50%;flex-shrink:0}
   .focus-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .kbd-hints{margin-top:18px;font-size:11px;color:var(--dim);letter-spacing:.04em;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .kbd{display:inline-flex;align-items:center;justify-content:center;padding:2px 6px;border:1px solid var(--line2);border-bottom-width:2px;border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--panel2);min-width:18px;margin-right:5px}
 
   .queue{margin-top:24px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px}
   .queue-title{font-family:var(--serif);font-size:14px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin-bottom:16px}
@@ -171,6 +179,7 @@
 
   /* ── EMPTY STATES ─────────────────────────────── */
   .empty{padding:60px 20px;text-align:center;color:var(--muted);font-family:var(--serif);font-size:18px;font-style:italic}
+  .plan-empty{grid-column:1/-1;padding:48px 20px;text-align:center;color:var(--muted);font-family:var(--serif);font-size:18px;font-style:italic;border:1px dashed var(--line2);border-radius:14px}
 
   /* ── MOBILE ───────────────────────────────────── */
   @media (max-width:760px){
@@ -192,7 +201,7 @@
 
 <header class="hero">
   <div>
-    <div class="hero-mark">Артефакт · Карьерный трек · Тикун Лаб 2.0</div>
+    <div class="hero-mark">Артефакт · Карьерный трек · Тикун Лаб 2.0 <span class="save-ping" id="savePing" title="Сохранено локально"></span></div>
     <h1>Сегодня — день <span class="num" id="dayOfYear">140</span></h1>
     <div class="hero-sub" id="heroSub">Три фазы: спланировать, прожить, осмыслить. Один артефакт вместо пяти приложений. Подключи коннекторы Claude — и круг замкнётся.</div>
   </div>
@@ -237,6 +246,7 @@
   <div id="runStage" class="focus-stage">
     <div class="ring-wrap">
       <svg viewBox="0 0 240 240" width="260" height="260">
+        <g id="ticks"></g>
         <circle cx="120" cy="120" r="110" class="ring-bg"/>
         <circle cx="120" cy="120" r="110" class="ring-fg" id="ring" stroke-dasharray="691.15" stroke-dashoffset="691.15"/>
       </svg>
@@ -278,6 +288,12 @@
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M10 5l3 3-3 3M3 4v8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Дальше
         </button>
+      </div>
+      <div class="kbd-hints">
+        <span><span class="kbd">Space</span>старт/пауза</span>
+        <span><span class="kbd">Enter</span>готово</span>
+        <span><span class="kbd">→</span>в конец</span>
+        <span><span class="kbd">N</span>дальше</span>
       </div>
     </div>
   </div>
@@ -341,7 +357,14 @@
     runIdx:0,dayNote:"",dayScore:7
   };
   let state=load()||defaultState;
-  function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+  let savePingTimer=null;
+  function save(){
+    try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
+    const p=document.getElementById("savePing");
+    if(!p)return;
+    p.classList.remove("on");void p.offsetWidth;p.classList.add("on");
+    clearTimeout(savePingTimer);savePingTimer=setTimeout(()=>p.classList.remove("on"),1200);
+  }
   function load(){try{const v=localStorage.getItem(KEY);return v?JSON.parse(v):null}catch(e){return null}}
 
   /* ── HERO CLOCK ────────────────────────────────── */
@@ -354,8 +377,61 @@
     const start=new Date(d.getFullYear(),0,0);
     const diff=(d-start)+(start.getTimezoneOffset()-d.getTimezoneOffset())*60*1000;
     $("#dayOfYear").textContent=Math.floor(diff/86400000);
+    const h=d.getHours();
+    const msg = h<5  ? "Ночь. День ещё не начался — поспи." :
+                h<11 ? "Утро. Спланируй день и начни с приоритета A." :
+                h<17 ? "День. Один таймер за раз — держи фокус." :
+                h<21 ? "Вечер. Закрой задачи и собери рефлексию." :
+                       "Ночь. День завершён — оставь след в письме.";
+    const sub=$("#heroSub");if(sub)sub.textContent=msg;
   }
   tickClock();setInterval(tickClock,30000);
+
+  /* ── CLOCK TICKS ───────────────────────────────── */
+  (function drawTicks(){
+    const g=document.getElementById("ticks");if(!g)return;
+    const cx=120,cy=120,rOut=120,rMajor=104,rMinor=108;
+    let svg="";
+    for(let i=0;i<60;i++){
+      const isMajor=i%5===0;
+      const a=(i/60)*Math.PI*2-Math.PI/2;
+      const r1=rOut-2;
+      const r2=isMajor?rMajor:rMinor;
+      const x1=cx+Math.cos(a)*r1, y1=cy+Math.sin(a)*r1;
+      const x2=cx+Math.cos(a)*r2, y2=cy+Math.sin(a)*r2;
+      svg+=`<line class="tick ${isMajor?"major":"minor"}" x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}"/>`;
+    }
+    g.innerHTML=svg;
+  })();
+
+  /* ── SOUND ─────────────────────────────────────── */
+  let audioCtx=null;
+  function playEndBeep(){
+    try{
+      if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+      const t0=audioCtx.currentTime;
+      [0,.28,.56].forEach((dt,i)=>{
+        const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+        o.type="sine";o.frequency.value=i===2?660:880;
+        g.gain.setValueAtTime(0,t0+dt);
+        g.gain.linearRampToValueAtTime(.15,t0+dt+.01);
+        g.gain.exponentialRampToValueAtTime(.001,t0+dt+.22);
+        o.connect(g);g.connect(audioCtx.destination);
+        o.start(t0+dt);o.stop(t0+dt+.25);
+      });
+    }catch(e){}
+  }
+
+  /* ── KEYBOARD ──────────────────────────────────── */
+  document.addEventListener("keydown",e=>{
+    if(!$("#run").classList.contains("active"))return;
+    const tag=e.target.tagName;
+    if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT")return;
+    if(e.code==="Space"){e.preventDefault();running?pauseTimer():startTimer()}
+    else if(e.code==="Enter"){e.preventDefault();$("#btnDone").click()}
+    else if(e.code==="ArrowRight"){e.preventDefault();$("#btnPostpone").click()}
+    else if(e.code==="KeyN"){e.preventDefault();$("#btnNext").click()}
+  });
 
   /* ── TABS ──────────────────────────────────────── */
   $$("#tabs button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
@@ -376,6 +452,10 @@
 
   function renderPlan(){
     const root=$("#taskGrid");root.innerHTML="";
+    if(!state.tasks.length){
+      root.innerHTML='<div class="plan-empty">Пусто. Добавь первую задачу — это начало дня.</div>';
+      updateSummary();return;
+    }
     state.tasks.forEach((t,i)=>{
       const card=document.createElement("div");
       card.className="task-card"+(t.done?" done":"");
@@ -487,7 +567,12 @@
     running=true;wasStarted=true;
     $("#startLabel").textContent="Идёт";
     renderTimer(total);
-    timerInt=setInterval(()=>{remaining--;renderTimer(total)},1000);
+    let beeped=false;
+    timerInt=setInterval(()=>{
+      remaining--;
+      if(remaining===0&&!beeped){beeped=true;playEndBeep()}
+      renderTimer(total);
+    },1000);
   }
   function pauseTimer(){running=false;clearInterval(timerInt);$("#startLabel").textContent="Продолжить";renderTimer((+state.tasks[pendingIdx()]?.min||0)*60)}
   function stopTimer(){pauseTimer();wasStarted=false;remaining=0;$("#startLabel").textContent="Старт";renderTimer(1500)}
